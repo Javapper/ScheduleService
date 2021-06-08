@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 @Service
 public class TaskServiceImpl implements TaskService {
 
+    private final String pathToAuthorizationService = "http://authorization-service:8092";
     private final ObjectMapper objectMapper;
     private final ModelMapper modelMapper;
     private final TaskMapper taskMapper;
@@ -105,7 +106,7 @@ public class TaskServiceImpl implements TaskService {
         HttpRequest request = HttpRequest.newBuilder()
                 .POST(HttpRequest.BodyPublishers.ofString(token))
                 .timeout(Duration.ofSeconds(5))
-                .uri(URI.create("http://localhost:8092/tokens/check-token"))
+                .uri(URI.create(pathToAuthorizationService + "/tokens/check-token"))
                 .build();
         HttpResponse<String> response = client
                 .send(request, HttpResponse.BodyHandlers.ofString());

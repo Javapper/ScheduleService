@@ -26,6 +26,13 @@ public class ResponseServiceImpl implements ResponseService {
     private final HttpClient client;
     private final ObjectMapper objectMapper;
 
+    private final String nameOfTaskService = "task-service";
+    private final String nameOfNotificationService = "notification-service";
+
+    private final String pathToTaskService = "http://gateway-service:8090";
+    private final String pathToNotificationService = "http://notification-service:8091";
+    private final String pathToAuthorizationService = "http://authorization-service:8092";
+
     @Autowired
     public ResponseServiceImpl(HttpClient client, ObjectMapper objectMapper) {
         this.client = client;
@@ -33,12 +40,12 @@ public class ResponseServiceImpl implements ResponseService {
     }
 
     public ResponseEntity<TaskDTO> showTaskById(long taskId) throws IOException, InterruptedException {
-        TokenDTO tokenDTO = createToken("tasks-service");
+        TokenDTO tokenDTO = createToken(nameOfTaskService);
         String token = objectMapper.writeValueAsString(tokenDTO);
         HttpRequest request = HttpRequest.newBuilder().GET()
                 .timeout(Duration.ofSeconds(5))
                 .header("token", token)
-                .uri(URI.create("http://localhost:8090/tasks/id-"+ taskId))
+                .uri(URI.create(pathToTaskService + "/tasks/id-"+ taskId))
                 .build();
         log.info("Создался GET-запрос по адресу " + request.uri() + " с токеном " + tokenDTO);
         TaskDTO response = objectMapper.readValue(sendRequest(request).getBody(), TaskDTO.class);
@@ -46,12 +53,12 @@ public class ResponseServiceImpl implements ResponseService {
     }
 
     public ResponseEntity<List<TaskDTO>> showAllTasks() throws IOException, InterruptedException {
-        TokenDTO tokenDTO = createToken("tasks-service");
+        TokenDTO tokenDTO = createToken(nameOfTaskService);
         String token = objectMapper.writeValueAsString(tokenDTO);
         HttpRequest request = HttpRequest.newBuilder().GET()
                 .timeout(Duration.ofSeconds(5))
                 .header("token", token)
-                .uri(URI.create("http://localhost:8090/tasks/all"))
+                .uri(URI.create(pathToTaskService + "/tasks/all"))
                 .build();
         log.info("Создался GET-запрос по адресу " + request.uri() + " с токеном " + tokenDTO);
         List<TaskDTO> response = objectMapper.readValue(sendRequest(request).getBody(), List.class);
@@ -59,12 +66,12 @@ public class ResponseServiceImpl implements ResponseService {
     }
 
     public ResponseEntity<List<TaskDTO>> showAllTasksAtDay(String dateStr) throws IOException, InterruptedException {
-        TokenDTO tokenDTO = createToken("tasks-service");
+        TokenDTO tokenDTO = createToken(nameOfTaskService);
         String token = objectMapper.writeValueAsString(tokenDTO);
         HttpRequest request = HttpRequest.newBuilder().GET()
                 .timeout(Duration.ofSeconds(5))
                 .header("token", token)
-                .uri(URI.create("http://localhost:8090/tasks/date-"+ dateStr))
+                .uri(URI.create(pathToTaskService + "/tasks/date-"+ dateStr))
                 .build();
         log.info("Создался GET-запрос по адресу " + request.uri() + " с токеном " + tokenDTO);
         List<TaskDTO> response = objectMapper.readValue(sendRequest(request).getBody(), List.class);
@@ -72,14 +79,14 @@ public class ResponseServiceImpl implements ResponseService {
     }
 
     public ResponseEntity<AnyTypePattern> addTask(TaskDTO taskDTO) throws IOException, InterruptedException {
-        TokenDTO tokenDTO = createToken("tasks-service");
+        TokenDTO tokenDTO = createToken(nameOfTaskService);
         String token = objectMapper.writeValueAsString(tokenDTO);
         String task = objectMapper.writeValueAsString(taskDTO);
         HttpRequest request = HttpRequest.newBuilder()
                 .POST(HttpRequest.BodyPublishers.ofString(task))
                 .timeout(Duration.ofSeconds(5))
                 .header("token", token)
-                .uri(URI.create("http://localhost:8090/tasks/"))
+                .uri(URI.create(pathToTaskService + "/tasks/"))
                 .build();
         log.info("Создался POST-запрос по адресу " + request.uri() +
                 " с телом " + taskDTO.toString() +
@@ -88,26 +95,26 @@ public class ResponseServiceImpl implements ResponseService {
     }
 
     public ResponseEntity<AnyTypePattern> deleteTask(int taskId) throws IOException, InterruptedException {
-        TokenDTO tokenDTO = createToken("tasks-service");
+        TokenDTO tokenDTO = createToken(nameOfTaskService);
         String token = objectMapper.writeValueAsString(tokenDTO);
         HttpRequest request = HttpRequest.newBuilder().DELETE()
                 .timeout(Duration.ofSeconds(5))
                 .header("token", token)
-                .uri(URI.create("http://localhost:8090/tasks/"+ taskId))
+                .uri(URI.create(pathToTaskService + "/tasks/"+ taskId))
                 .build();
         log.info("Создался DELETE-запрос по адресу " + request.uri() + " с токеном " + tokenDTO);
         return sendRequestWithResponseAnyTypePattern(request);
     }
 
     public ResponseEntity<AnyTypePattern> updateTask(TaskDTO taskDTO) throws IOException, InterruptedException {
-        TokenDTO tokenDTO = createToken("tasks-service");
+        TokenDTO tokenDTO = createToken(nameOfTaskService);
         String token = objectMapper.writeValueAsString(tokenDTO);
         String task = objectMapper.writeValueAsString(taskDTO);
         HttpRequest request = HttpRequest.newBuilder()
                 .PUT(HttpRequest.BodyPublishers.ofString(task))
                 .timeout(Duration.ofSeconds(5))
                 .header("token", token)
-                .uri(URI.create("http://localhost:8090/tasks/change-task"))
+                .uri(URI.create(pathToTaskService + "/tasks/change-task"))
                 .build();
         log.info("Создался PUT-запрос по адресу " + request.uri() +
                 " с task = " + taskDTO.getTask() +
@@ -116,72 +123,70 @@ public class ResponseServiceImpl implements ResponseService {
     }
 
     public ResponseEntity<AnyTypePattern> rescheduleTask(TaskDTO taskDTO) throws IOException, InterruptedException {
-        TokenDTO tokenDTO = createToken("tasks-service");
+        TokenDTO tokenDTO = createToken(nameOfTaskService);
         String token = objectMapper.writeValueAsString(tokenDTO);
         String task = objectMapper.writeValueAsString(taskDTO);
         HttpRequest request = HttpRequest.newBuilder()
                 .PUT(HttpRequest.BodyPublishers.ofString(task))
                 .timeout(Duration.ofSeconds(5))
                 .header("token", token)
-                .uri(URI.create("http://localhost:8090/tasks/change-date"))
+                .uri(URI.create(pathToTaskService + "/tasks/change-date"))
                 .build();
-        log.info("Создался PUT-запрос по адресу " + request.uri() +
-                " с date = " + taskDTO.getDate() +
-                " с токеном " + tokenDTO);
+
         return sendRequestWithResponseAnyTypePattern(request);
     }
 
     public ResponseEntity<AnyTypePattern> makeTaskDone(int taskId) throws IOException, InterruptedException {
-        TokenDTO tokenDTO = createToken("tasks-service");
+        TokenDTO tokenDTO = createToken(nameOfTaskService);
         String token = objectMapper.writeValueAsString(tokenDTO);
         HttpRequest request = HttpRequest.newBuilder()
                 .PUT(HttpRequest.BodyPublishers.noBody())
                 .timeout(Duration.ofSeconds(5))
                 .header("token", token)
-                .uri(URI.create("http://localhost:8090/tasks/"
-                        + taskId + "/make-done"
-                        + " с токеном " + tokenDTO))
+                .uri(URI.create(pathToTaskService + "/tasks/"
+                        + taskId + "/make-done"))
                 .build();
+        log.info("Создался PUT-запрос по адресу " + request.uri() + " с токеном " + tokenDTO);
         logPutRequest(tokenDTO, request);
         return sendRequestWithResponseAnyTypePattern(request);
     }
 
     public ResponseEntity<AnyTypePattern> makeTaskUndone(int taskId) throws IOException, InterruptedException {
-        TokenDTO tokenDTO = createToken("tasks-service");
+        TokenDTO tokenDTO = createToken(nameOfTaskService);
         String token = objectMapper.writeValueAsString(tokenDTO);
         HttpRequest request = HttpRequest.newBuilder()
                 .PUT(HttpRequest.BodyPublishers.noBody())
                 .timeout(Duration.ofSeconds(5))
                 .header("token", token)
-                .uri(URI.create("http://localhost:8090/tasks/"
-                        + taskId + "/make-undone"
-                        + " с токеном " + tokenDTO))
+                .uri(URI.create(pathToTaskService + "/tasks/"
+                        + taskId + "/make-undone"))
                 .build();
+        log.info("Создался PUT-запрос по адресу " + request.uri() + " с токеном " + tokenDTO);
         logPutRequest(tokenDTO, request);
         return sendRequestWithResponseAnyTypePattern(request);
     }
 
     public ResponseEntity<AnyTypePattern> startSendMessagesInTelegram() throws IOException, InterruptedException {
-        TokenDTO tokenDTO = createToken("notification-service");
+        TokenDTO tokenDTO = createToken(nameOfNotificationService);
         String token = objectMapper.writeValueAsString(tokenDTO);
         HttpRequest request = HttpRequest.newBuilder()
                 .PUT(HttpRequest.BodyPublishers.noBody())
                 .timeout(Duration.ofSeconds(5))
                 .header("token", token)
-                .uri(URI.create("http://localhost:8091/notification/turn-on"))
+                .uri(URI.create(pathToNotificationService + "/notification/turn-on"))
                 .build();
         logPutRequest(tokenDTO, request);
         return sendRequestWithResponseAnyTypePattern(request);
     }
 
     public ResponseEntity<AnyTypePattern> stopSendMessagesInTelegram() throws IOException, InterruptedException {
-        TokenDTO tokenDTO = createToken("notification-service");
+        TokenDTO tokenDTO = createToken(nameOfNotificationService);
         String token = objectMapper.writeValueAsString(tokenDTO);
         HttpRequest request = HttpRequest.newBuilder()
                 .PUT(HttpRequest.BodyPublishers.noBody())
                 .timeout(Duration.ofSeconds(5))
                 .header("token", token)
-                .uri(URI.create("http://localhost:8091/notification/turn-off"))
+                .uri(URI.create(pathToNotificationService + "/turn-off"))
                 .build();
         logPutRequest(tokenDTO, request);
         return sendRequestWithResponseAnyTypePattern(request);
@@ -203,7 +208,7 @@ public class ResponseServiceImpl implements ResponseService {
         HttpRequest request = HttpRequest.newBuilder()
                 .POST(HttpRequest.BodyPublishers.noBody())
                 .timeout(Duration.ofSeconds(5))
-                .uri(URI.create("http://localhost:8092/tokens/create-token-from-gateway-to-" + serviceTo))
+                .uri(URI.create(pathToAuthorizationService + "/tokens/create-token-from-gateway-to-" + serviceTo))
                 .build();
         HttpResponse<String> response = client
                 .send(request, HttpResponse.BodyHandlers.ofString());

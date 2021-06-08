@@ -1,8 +1,15 @@
 package com.company.service.api;
 
+import org.aspectj.weaver.patterns.AnyTypePattern;
+import org.springframework.http.ResponseEntity;
+
+import java.io.IOException;
+
 public interface TelegramNotifier {
 
-    void startSendMessages();
+    ResponseEntity<AnyTypePattern> startSendMessages();
 
-    void stopSendMessages();
+    ResponseEntity<AnyTypePattern> stopSendMessages();
+
+    boolean isAllowedRequest(String token) throws IOException, InterruptedException;
 }

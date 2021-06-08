@@ -49,5 +49,3 @@ public interface TaskMapper {
             "WHERE task_id = #{taskId}")
     void makeTaskUndone(int taskId);
 }
-
-INSERT INTO tasks (task, date, is_done) VALUES ('do', '2021-05-05', false);

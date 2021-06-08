@@ -13,7 +13,7 @@ import org.springframework.stereotype.Repository;
 public interface AllowedRequestMapper {
 
     @Select("SELECT * FROM allowed_requests " +
-            "WHERE service_from = 'gateway' AND " +
+            "WHERE service_from = #{serviceFrom} AND " +
             "service_to = #{serviceTo}")
     AllowedRequestEntity selectAllowedRequestIfExist(AllowedRequestEntity allowedRequestEntity);
 

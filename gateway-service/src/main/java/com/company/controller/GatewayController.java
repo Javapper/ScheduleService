@@ -5,6 +5,7 @@ import com.company.dto.TaskDTO;
 import com.company.service.impl.ResponseServiceImpl;
 import org.aspectj.weaver.patterns.AnyTypePattern;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -16,7 +17,7 @@ import java.util.List;
 @RequestMapping("/")
 public class GatewayController {
     private final ResponseServiceImpl responseService;
-    private final String servicePath = "http://localhost:8080";
+    private final String gatewayService = "http://gateway-service:8081";
 
     @Autowired
     public GatewayController(ResponseServiceImpl responseService) {
@@ -25,67 +26,67 @@ public class GatewayController {
 
     @GetMapping("tasks/id-{taskId}")
     public ResponseEntity<TaskDTO> showTaskById(@PathVariable long taskId) throws IOException, InterruptedException {
-        log.info("Произведён GET-запрос по адресу " + servicePath + "/tasks/id-" + taskId);
+        log.info("Произведён GET-запрос по адресу " + gatewayService + "/tasks/id-" + taskId);
         return responseService.showTaskById(taskId);
     }
 
     @GetMapping("tasks/all")
     public ResponseEntity<List<TaskDTO>> showAllTasks() throws IOException, InterruptedException {
-        log.info("Произведён GET-запрос по адресу "+ servicePath + "/tasks/all");
+        log.info("Произведён GET-запрос по адресу "+ gatewayService + "/tasks/all");
         return responseService.showAllTasks();
     }
 
     @GetMapping("tasks/date-{date}")
     public ResponseEntity<List<TaskDTO>> showAllTasksAtDay(@PathVariable String date) throws IOException, InterruptedException {
-        log.info("Произведён GET-запрос по адресу " + servicePath + "/tasks/date-" + date);
+        log.info("Произведён GET-запрос по адресу " + gatewayService + "/tasks/date-" + date);
         return responseService.showAllTasksAtDay(date);
     }
 
     @PostMapping("tasks")
     public ResponseEntity<AnyTypePattern> addTask(@RequestBody @Validated TaskDTO taskDTO) throws IOException, InterruptedException {
-        log.info("Произведён POST-запрос по адресу " + servicePath + "/tasks c телом " + taskDTO.toString());
+        log.info("Произведён POST-запрос по адресу " + gatewayService + "/tasks c телом " + taskDTO.toString());
         return responseService.addTask(taskDTO);
     }
 
     @DeleteMapping("tasks/{taskId}")
     public ResponseEntity<AnyTypePattern> deleteTask(@PathVariable int taskId) throws IOException, InterruptedException {
-        log.info("Произведён DELETE-запрос по адресу " + servicePath + "/tasks/" + taskId);
+        log.info("Произведён DELETE-запрос по адресу " + gatewayService + "/tasks/" + taskId);
         return responseService.deleteTask(taskId);
     }
 
     @PutMapping("tasks/change-task")
     public ResponseEntity<AnyTypePattern> updateTask(@RequestBody @Validated TaskDTO taskDTO) throws IOException, InterruptedException {
-        log.info("Произведён PUT-запрос по адресу " + servicePath + "/tasks/change-task с task = " + taskDTO.getTask());
+        log.info("Произведён PUT-запрос по адресу " + gatewayService + "/tasks/change-task с task = " + taskDTO.getTask());
         return responseService.updateTask(taskDTO);
     }
 
     @PutMapping("tasks/change-date")
     public ResponseEntity<AnyTypePattern> rescheduleTask(@RequestBody @Validated TaskDTO taskDTO) throws IOException, InterruptedException {
-        log.info("Произведён PUT-запрос по адресу " + servicePath + "/tasks/change-date с date = " + taskDTO.getDate());
+        log.info("Произведён PUT-запрос по адресу " + gatewayService + "/tasks/change-date с date = " + taskDTO.getDate());
         return responseService.rescheduleTask(taskDTO);
     }
 
     @PutMapping("tasks/{taskId}/make-done")
     public ResponseEntity<AnyTypePattern> makeTaskDone(@PathVariable int taskId) throws IOException, InterruptedException {
-        log.info("Произведён PUT-запрос по адресу " + servicePath + "/tasks/" + taskId + "/make-done");
+        log.info("Произведён PUT-запрос по адресу " + gatewayService + "/tasks/" + taskId + "/make-done");
         return responseService.makeTaskDone(taskId);
     }
 
     @PutMapping("tasks/{taskId}/make-undone")
     public ResponseEntity<AnyTypePattern> makeTaskUndone(@PathVariable int taskId) throws IOException, InterruptedException {
-        log.info("Произведён PUT-запрос по адресу " + servicePath + "/tasks/" + taskId + "/make-undone");
+        log.info("Произведён PUT-запрос по адресу " + gatewayService + "/tasks/" + taskId + "/make-undone");
         return responseService.makeTaskUndone(taskId);
     }
 
     @PutMapping("notification/turn-on")
     public ResponseEntity<AnyTypePattern> startSendMessagesInTelegram() throws IOException, InterruptedException {
-        log.info("Произведён PUT-запрос по адресу " + servicePath + "/notification/turn-on");
+        log.info("Произведён PUT-запрос по адресу " + gatewayService + "/notification/turn-on");
         return responseService.startSendMessagesInTelegram();
     }
 
     @PutMapping("notification/turn-off")
     public ResponseEntity<AnyTypePattern> stopSendMessagesInTelegram() throws IOException, InterruptedException {
-        log.info("Произведён PUT-запрос по адресу " + servicePath + "/notification/turn-off");
+        log.info("Произведён PUT-запрос по адресу " + gatewayService + "/notification/turn-off");
         return responseService.stopSendMessagesInTelegram();
     }
 }

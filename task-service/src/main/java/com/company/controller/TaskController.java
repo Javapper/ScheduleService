@@ -2,7 +2,6 @@ package com.company.controller;
 
 import com.company.dto.TaskDTO;
 import com.company.service.api.TaskService;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.weaver.patterns.AnyTypePattern;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +21,7 @@ import java.util.List;
 public class TaskController {
 
     private final TaskService taskService;
-    private final String servicePath = "http://localhost:8090/tasks";
+    private final String pathToTaskService = "http://task-service:8090";
 
     @Autowired
     public TaskController(TaskService taskService) {
@@ -31,7 +30,7 @@ public class TaskController {
 
     @GetMapping("id-{taskId}")
     public ResponseEntity<TaskDTO> showTaskById(@PathVariable long taskId, @RequestHeader String token) throws IOException, InterruptedException {
-        log.info("Произведён GET-запрос по адресу " + servicePath + "/id-" + taskId + " с токеном " + token);
+        log.info("Произведён GET-запрос по адресу " + pathToTaskService + "/tasks/id-" + taskId + " с токеном " + token);
         if (taskService.isAllowedRequest(token)) {
             log.info("Токен прошёл проверку");
             TaskDTO taskDTO = taskService.showTaskById(taskId);
@@ -42,57 +41,96 @@ public class TaskController {
     }
 
     @GetMapping("all")
-    public ResponseEntity<List<TaskDTO>> showAllTasks() {
-        log.info("Произведён GET-запрос по адресу " + servicePath + "/all");
-        return ResponseEntity.ok(taskService.showAllTasks());
+    public ResponseEntity<List<TaskDTO>> showAllTasks(@RequestHeader String token) throws IOException, InterruptedException {
+        log.info("Произведён GET-запрос по адресу " + pathToTaskService + "/tasks/all");
+        if (taskService.isAllowedRequest(token)) {
+            log.info("Токен прошёл проверку");
+            List<TaskDTO> tasksDTO = taskService.showAllTasks();
+            log.info("С сервиса возвращается тело объекта: " + tasksDTO);
+            return ResponseEntity.ok(tasksDTO);
+        }
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
+
     }
 
     @GetMapping("date-{dateStr}")
-    public ResponseEntity<List<TaskDTO>> showAllTasksAtDay(@PathVariable String dateStr) {
-        log.info("Произведён GET-запрос по адресу " + servicePath + "/date-" + dateStr);
-        LocalDate date = LocalDate.parse(dateStr, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-        return ResponseEntity.ok(taskService.showAllTasksAtDay(date));
+    public ResponseEntity<List<TaskDTO>> showAllTasksAtDay(@PathVariable String dateStr, @RequestHeader String token) throws IOException, InterruptedException {
+        log.info("Произведён GET-запрос по адресу " + pathToTaskService + "/tasks/date-" + dateStr);
+        if (taskService.isAllowedRequest(token)) {
+            log.info("Токен прошёл проверку");
+            LocalDate date = LocalDate.parse(dateStr, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+            List<TaskDTO> tasksDTO = taskService.showAllTasksAtDay(date);
+            log.info("С сервиса возвращается тело объекта: " + tasksDTO);
+            return ResponseEntity.ok(tasksDTO);
+        }
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
+
     }
 
     @PostMapping("/")
-    public ResponseEntity<AnyTypePattern> addTask(@RequestBody String task) throws JsonProcessingException {
-        log.info("Произведён POST-запрос по адресу " + servicePath + " с телом " + task);
-        taskService.addTask(task);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<AnyTypePattern> addTask(@RequestBody String task, @RequestHeader String token) throws IOException, InterruptedException {
+        log.info("Произведён POST-запрос по адресу " + pathToTaskService + "/tasks с телом " + task);
+        if (taskService.isAllowedRequest(token)) {
+            log.info("Токен прошёл проверку");
+            taskService.addTask(task);
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
+
     }
 
     @DeleteMapping("{taskId}")
-    public ResponseEntity<AnyTypePattern> deleteTask(@PathVariable int taskId) {
-        log.info("Произведён DELETE-запрос по адресу " + servicePath + "/id-" + taskId);
-        taskService.deleteTask(taskId);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<AnyTypePattern> deleteTask(@PathVariable int taskId, @RequestHeader String token) throws IOException, InterruptedException {
+        log.info("Произведён DELETE-запрос по адресу " + pathToTaskService + "/tasks/id-" + taskId);
+        if (taskService.isAllowedRequest(token)) {
+            log.info("Токен прошёл проверку");
+            taskService.deleteTask(taskId);
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
     }
 
     @PutMapping("change-task")
-    public ResponseEntity<AnyTypePattern> updateTask(@RequestBody String task) throws JsonProcessingException {
-        log.info("Произведён PUT-запрос по адресу " + servicePath + "/change-task c task = " + task);
-        taskService.updateTask(task);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<AnyTypePattern> updateTask(@RequestBody String task, @RequestHeader String token) throws IOException, InterruptedException {
+        log.info("Произведён PUT-запрос по адресу " + pathToTaskService + "/tasks/change-task c task = " + task);
+        if (taskService.isAllowedRequest(token)) {
+            log.info("Токен прошёл проверку");
+            taskService.updateTask(task);
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
     }
 
     @PutMapping("change-date")
-    public ResponseEntity<AnyTypePattern> rescheduleTask(@RequestBody @Validated String date) throws JsonProcessingException {
-        log.info("Произведён PUT-запрос по адресу " + servicePath + "/change-date с date = " + date);
-        taskService.rescheduleTask(date);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<AnyTypePattern> rescheduleTask(@RequestBody @Validated String date, @RequestHeader String token) throws IOException, InterruptedException {
+        log.info("Произведён PUT-запрос по адресу " + pathToTaskService + "/tasks/change-date с date = " + date);
+        if (taskService.isAllowedRequest(token)) {
+            log.info("Токен прошёл проверку");
+            taskService.rescheduleTask(date);
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
     }
 
     @PutMapping("{taskId}/make-done")
-    public ResponseEntity<AnyTypePattern> makeTaskDone(@PathVariable int taskId) {
-        log.info("Произведён PUT-запрос по адресу " + servicePath + "/" + taskId + "/make-done");
-        taskService.makeTaskDone(taskId);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<AnyTypePattern> makeTaskDone(@PathVariable int taskId, @RequestHeader String token) throws IOException, InterruptedException {
+        log.info("Произведён PUT-запрос по адресу " + pathToTaskService + "/tasks/" + taskId + "/make-done");
+        if (taskService.isAllowedRequest(token)) {
+            log.info("Токен прошёл проверку");
+            taskService.makeTaskDone(taskId);
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
     }
 
     @PutMapping("{taskId}/make-undone")
-    public ResponseEntity<AnyTypePattern> makeTaskUndone(@PathVariable int taskId) {
-        log.info("Произведён PUT-запрос по адресу " + servicePath + "/" + taskId + "/make-undone");
-        taskService.makeTaskUndone(taskId);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<AnyTypePattern> makeTaskUndone(@PathVariable int taskId, @RequestHeader String token) throws IOException, InterruptedException {
+        log.info("Произведён PUT-запрос по адресу " + pathToTaskService + "/tasks/" + taskId + "/make-undone");
+        if (taskService.isAllowedRequest(token)) {
+            log.info("Токен прошёл проверку");
+            taskService.makeTaskUndone(taskId);
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
     }
 }

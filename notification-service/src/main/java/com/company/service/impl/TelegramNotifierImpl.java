@@ -3,13 +3,16 @@ package com.company.service.impl;
 import com.company.dto.TaskDTO;
 import com.company.mapper.TaskMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.aspectj.weaver.patterns.AnyTypePattern;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.company.service.api.TelegramNotifier;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
+import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -23,29 +26,35 @@ import java.util.TimerTask;
 @Service
 public class TelegramNotifierImpl implements TelegramNotifier {
 
-    TaskMapper taskMapper;
-    ModelMapper modelMapper;
+    private final TaskMapper taskMapper;
+    private final ModelMapper modelMapper;
+    private final HttpClient client;
+
+    private final String pathToAuthorizationService = "http://authorization-service:8092";
 
     @Autowired
-    public TelegramNotifierImpl(TaskMapper taskMapper, ModelMapper modelMapper) {
+    public TelegramNotifierImpl(TaskMapper taskMapper, ModelMapper modelMapper, HttpClient client) {
         this.taskMapper = taskMapper;
         this.modelMapper = modelMapper;
+        this.client = client;
     }
 
     Timer timer = new Timer();
 
     @Override
-    public void stopSendMessages() {
+    public ResponseEntity<AnyTypePattern> stopSendMessages() {
         log.info("Вызов метода stopSendMessages");
         timer.cancel();
+        return ResponseEntity.ok().build();
     }
 
     @Override
-    public void startSendMessages() {
+    public ResponseEntity<AnyTypePattern> startSendMessages() {
         log.info("Вызов метода startSendMessages");
         long periodOfSending = 1000 * 60 * 60 * 24; //1 раз в день;
         String tasks = selectAllTaskForDay();
         timer.schedule(new SenderMessages(tasks), 0 /*getCountOfMillisecondsTo8()*/, periodOfSending);
+        return ResponseEntity.ok().build();
     }
 
     private String selectAllTaskForDay() {
@@ -77,6 +86,19 @@ public class TelegramNotifierImpl implements TelegramNotifier {
         calendar.set(Calendar.MILLISECOND, 0);
 
         return calendar.getTimeInMillis() - System.currentTimeMillis();
+    }
+
+    public boolean isAllowedRequest(String token) throws IOException, InterruptedException {
+        log.info("Запрос на сервер авторизации для проверки токена");
+        HttpRequest request = HttpRequest.newBuilder()
+                .POST(HttpRequest.BodyPublishers.ofString(token))
+                .timeout(Duration.ofSeconds(5))
+                .uri(URI.create(pathToAuthorizationService + "/tokens/check-token"))
+                .build();
+        HttpResponse<String> response = client
+                .send(request, HttpResponse.BodyHandlers.ofString());
+        log.info("Получен результат от сервера аторизации: " + response.body());
+        return response.body().equals("true");
     }
 }
 
