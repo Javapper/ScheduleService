@@ -1,0 +1,45 @@
+version: '3'
+
+services:
+  gateway-service:
+    build: gateway-service/
+    ports:
+      - 8080:8080
+    depends_on:
+      - task-service
+      - notification-service
+      - authorization-service
+
+  task-service:
+    build: task-service/
+    ports:
+      - 8090:8090
+    depends_on:
+      - db
+
+  notification-service:
+    build: notification-service/
+    ports:
+      - 8091:8091
+    depends_on:
+      - db
+
+  authorization-service:
+    build: authorization-service/
+    ports:
+      - 8092:8092
+    depends_on:
+      - db
+
+  db:
+    image: postgres
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+    - 5432:5432
+    environment:
+      POSTGRES_PASSWORD: admin
+      POSTGRES_USER: postgres
+      POSTGRES_DB: schedule
+
+

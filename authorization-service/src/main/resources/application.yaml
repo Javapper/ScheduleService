@@ -1,0 +1,14 @@
+server:
+  port: 8092
+
+spring:
+  datasource:
+    username: postgres
+    password: admin
+    url: jdbc:postgresql://db:5432/schedule
+  application:
+    name: authorization-service
+
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
