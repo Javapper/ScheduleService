@@ -31,83 +31,114 @@ public class TaskController {
     @GetMapping("{taskId}")
     public ResponseEntity<TaskDTO> showTaskById(@PathVariable long taskId, @RequestHeader String token) throws IOException, InterruptedException {
         log.info("Произведён GET-запрос по адресу " + pathToTaskService + "/tasks/" + taskId + " с токеном " + token);
-        if (taskService.isAllowedRequest(token)) {
-            log.info("Токен прошёл проверку");
-            TaskDTO taskDTO = taskService.showTaskById(taskId);
-            log.info("С сервиса возвращается тело объекта: " + taskDTO);
-            return ResponseEntity.ok(taskDTO);
+        if (taskId == 0) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        } else if (token == null) {
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
+        } else {
+            if (taskService.isAllowedRequest(token)) {
+                log.info("Токен прошёл проверку");
+                TaskDTO taskDTO = taskService.showTaskById(taskId);
+                log.info("С сервиса возвращается тело объекта: " + taskDTO);
+                return ResponseEntity.ok(taskDTO);
+            }
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
         }
-        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
     }
 
     @GetMapping("")
     public ResponseEntity<List<TaskDTO>> showAllTasks(@RequestHeader String token) throws IOException, InterruptedException {
         log.info("Произведён GET-запрос по адресу " + pathToTaskService + "/tasks/all");
-        if (taskService.isAllowedRequest(token)) {
-            log.info("Токен прошёл проверку");
-            List<TaskDTO> tasksDTO = taskService.showAllTasks();
-            log.info("С сервиса возвращается тело объекта: " + tasksDTO);
-            return ResponseEntity.ok(tasksDTO);
+        if (token != null) {
+            if (taskService.isAllowedRequest(token)) {
+                log.info("Токен прошёл проверку");
+                List<TaskDTO> tasksDTO = taskService.showAllTasks();
+                log.info("С сервиса возвращается тело объекта: " + tasksDTO);
+                return ResponseEntity.ok(tasksDTO);
+            }
         }
         return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
-
     }
 
     @GetMapping("?date={date}")
-    public ResponseEntity<List<TaskDTO>> showAllTasksAtDay(@RequestParam String dateStr, @RequestHeader String token) throws IOException, InterruptedException {
-        log.info("Произведён GET-запрос по адресу " + pathToTaskService + "/tasks/?date=" + dateStr);
-        if (taskService.isAllowedRequest(token)) {
-            log.info("Токен прошёл проверку");
-            LocalDate date = LocalDate.parse(dateStr, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-            List<TaskDTO> tasksDTO = taskService.showAllTasksAtDay(date);
-            log.info("С сервиса возвращается тело объекта: " + tasksDTO);
-            return ResponseEntity.ok(tasksDTO);
+    public ResponseEntity<List<TaskDTO>> showAllTasksAtDay(@RequestParam String date, @RequestHeader String token) throws IOException, InterruptedException {
+        log.info("Произведён GET-запрос по адресу " + pathToTaskService + "/tasks/?date=" + date);
+        if (token != null) {
+            if (taskService.isAllowedRequest(token)) {
+                log.info("Токен прошёл проверку");
+                try {
+                    LocalDate localDate = LocalDate.parse(date, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+                    List<TaskDTO> tasksDTO = taskService.showAllTasksAtDay(localDate);
+                    log.info("С сервиса возвращается тело объекта: " + tasksDTO);
+                    return ResponseEntity.ok(tasksDTO);
+                } catch (Exception e) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+                }
+            }
         }
         return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
-
     }
 
-    @PostMapping("/")
+        @PostMapping("/")
     public ResponseEntity<AnyTypePattern> addTask(@RequestBody String task, @RequestHeader String token) throws IOException, InterruptedException {
         log.info("Произведён POST-запрос по адресу " + pathToTaskService + "/tasks с телом " + task);
-        if (taskService.isAllowedRequest(token)) {
-            log.info("Токен прошёл проверку");
-            taskService.addTask(task);
-            return ResponseEntity.ok().build();
+        if (task == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        } else if (token == null) {
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
+        } else {
+            if (taskService.isAllowedRequest(token)) {
+                log.info("Токен прошёл проверку");
+                taskService.addTask(task);
+                return ResponseEntity.ok().build();
+            }
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
         }
-        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
-
     }
 
     @DeleteMapping("{taskId}")
     public ResponseEntity<AnyTypePattern> deleteTask(@PathVariable int taskId, @RequestHeader String token) throws IOException, InterruptedException {
         log.info("Произведён DELETE-запрос по адресу " + pathToTaskService + "/tasks/" + taskId);
-        if (taskService.isAllowedRequest(token)) {
-            log.info("Токен прошёл проверку");
-            taskService.deleteTask(taskId);
-            return ResponseEntity.ok().build();
+        if (taskId == 0) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        } else if (token == null) {
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
+        } else {
+            if (taskService.isAllowedRequest(token)) {
+                log.info("Токен прошёл проверку");
+                taskService.deleteTask(taskId);
+                return ResponseEntity.ok().build();
+            }
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
         }
-        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
     }
 
     @PutMapping("change-task")
     public ResponseEntity<AnyTypePattern> updateTask(@RequestBody String task, @RequestHeader String token) throws IOException, InterruptedException {
         log.info("Произведён PUT-запрос по адресу " + pathToTaskService + "/tasks/change-task c task = " + task);
-        if (taskService.isAllowedRequest(token)) {
-            log.info("Токен прошёл проверку");
-            taskService.updateTask(task);
-            return ResponseEntity.ok().build();
+        if (task.equals("'") || task.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        } else if (token == null) {
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
+        } else {
+            if (taskService.isAllowedRequest(token)) {
+                log.info("Токен прошёл проверку");
+                taskService.updateTask(task);
+                return ResponseEntity.ok().build();
+            }
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
         }
-        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
     }
 
     @PutMapping("change-date")
-    public ResponseEntity<AnyTypePattern> rescheduleTask(@RequestBody @Validated String date, @RequestHeader String token) throws IOException, InterruptedException {
-        log.info("Произведён PUT-запрос по адресу " + pathToTaskService + "/tasks/change-date с date = " + date);
-        if (taskService.isAllowedRequest(token)) {
-            log.info("Токен прошёл проверку");
-            taskService.rescheduleTask(date);
-            return ResponseEntity.ok().build();
+    public ResponseEntity<AnyTypePattern> rescheduleTask(@RequestBody @Validated String taskDTO, @RequestHeader String token) throws IOException, InterruptedException {
+        log.info("Произведён PUT-запрос по адресу " + pathToTaskService + "/tasks/change-date с телом = " + taskDTO);
+        if (token != null) {
+            if (taskService.isAllowedRequest(token)) {
+                log.info("Токен прошёл проверку");
+                taskService.rescheduleTask(taskDTO);
+                return ResponseEntity.ok().build();
+            }
         }
         return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
     }
@@ -115,22 +146,34 @@ public class TaskController {
     @PutMapping("{taskId}/do")
     public ResponseEntity<AnyTypePattern> makeTaskDone(@PathVariable int taskId, @RequestHeader String token) throws IOException, InterruptedException {
         log.info("Произведён PUT-запрос по адресу " + pathToTaskService + "/tasks/" + taskId + "/do");
-        if (taskService.isAllowedRequest(token)) {
-            log.info("Токен прошёл проверку");
-            taskService.makeTaskDone(taskId);
-            return ResponseEntity.ok().build();
+        if (taskId == 0) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        } else if (token == null) {
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
+        } else {
+            if (taskService.isAllowedRequest(token)) {
+                log.info("Токен прошёл проверку");
+                taskService.makeTaskDone(taskId);
+                return ResponseEntity.ok().build();
+            }
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
         }
-        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
     }
 
     @PutMapping("{taskId}/undo")
     public ResponseEntity<AnyTypePattern> makeTaskUndone(@PathVariable int taskId, @RequestHeader String token) throws IOException, InterruptedException {
         log.info("Произведён PUT-запрос по адресу " + pathToTaskService + "/tasks/" + taskId + "/undo");
-        if (taskService.isAllowedRequest(token)) {
-            log.info("Токен прошёл проверку");
-            taskService.makeTaskUndone(taskId);
-            return ResponseEntity.ok().build();
+        if (taskId == 0) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        } else if (token == null) {
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
+        } else {
+            if (taskService.isAllowedRequest(token)) {
+                log.info("Токен прошёл проверку");
+                taskService.makeTaskUndone(taskId);
+                return ResponseEntity.ok().build();
+            }
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
         }
-        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
     }
 }

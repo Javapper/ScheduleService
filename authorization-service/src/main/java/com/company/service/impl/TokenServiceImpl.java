@@ -11,6 +11,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -37,16 +39,16 @@ public class TokenServiceImpl implements TokenService {
     }
 
     @Override
-    public TokenDTO createToken(String serviceFrom, String serviceTo) {
+    public ResponseEntity<?> createToken(String serviceFrom, String serviceTo) {
         log.info("Получен запрос на создание нового токена");
         if (isRequestAllowed(serviceFrom, serviceTo)) {
             log.info("Запрос от одного сервиса к другому разрешён");
             TokenEntity newToken = createNewToken(serviceFrom, serviceTo);
             tokenMapper.addToken(newToken);
-            return modelMapper.map(newToken, TokenDTO.class);
+            return ResponseEntity.ok(modelMapper.map(newToken, TokenDTO.class));
         }
         log.info("Запрос от одного сервиса к другому запрещён");
-        return null;
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
     }
 
     private boolean isRequestAllowed(String serviceFrom, String serviceTo) {

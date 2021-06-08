@@ -4,6 +4,7 @@ import com.company.dto.TokenDTO;
 import com.company.service.api.TokenService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,12 +19,20 @@ public class TokenController {
     }
 
     @PostMapping("create-token-from-{serviceFrom}-to-{serviceTo}")
-    public ResponseEntity<TokenDTO> createToken(@PathVariable String serviceFrom, @PathVariable String serviceTo) {
-        return ResponseEntity.ok(tokenService.createToken(serviceFrom, serviceTo));
+    public ResponseEntity<?> createToken(@PathVariable String serviceFrom, @PathVariable String serviceTo) {
+        if (serviceFrom.equals("") || serviceTo.equals("")) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+        ResponseEntity responseFromServer = tokenService.createToken(serviceFrom, serviceTo);
+        return ResponseEntity.status(responseFromServer.getStatusCode()).body(responseFromServer.getBody());
+
     }
 
     @PostMapping("check-token")
-    public ResponseEntity<Boolean> checkToken(@RequestBody String token) throws JsonProcessingException {
-        return ResponseEntity.ok(tokenService.checkToken(token));
+    public ResponseEntity<?> checkToken(@RequestBody String token) throws JsonProcessingException {
+        if (tokenService.checkToken(token)) {
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
     }
 }
