@@ -24,21 +24,21 @@ public class GatewayController {
         this.responseService = responseService;
     }
 
-    @GetMapping("tasks/id-{taskId}")
+    @GetMapping("tasks/{taskId}")
     public ResponseEntity<TaskDTO> showTaskById(@PathVariable long taskId) throws IOException, InterruptedException {
-        log.info("Произведён GET-запрос по адресу " + gatewayService + "/tasks/id-" + taskId);
+        log.info("Произведён GET-запрос по адресу " + gatewayService + "/tasks/" + taskId);
         return responseService.showTaskById(taskId);
     }
 
-    @GetMapping("tasks/all")
+    @GetMapping("tasks/")
     public ResponseEntity<List<TaskDTO>> showAllTasks() throws IOException, InterruptedException {
-        log.info("Произведён GET-запрос по адресу "+ gatewayService + "/tasks/all");
+        log.info("Произведён GET-запрос по адресу "+ gatewayService + "/tasks");
         return responseService.showAllTasks();
     }
 
-    @GetMapping("tasks/date-{date}")
-    public ResponseEntity<List<TaskDTO>> showAllTasksAtDay(@PathVariable String date) throws IOException, InterruptedException {
-        log.info("Произведён GET-запрос по адресу " + gatewayService + "/tasks/date-" + date);
+    @GetMapping("tasks/?date={date}")
+    public ResponseEntity<List<TaskDTO>> showAllTasksAtDay(@RequestParam String date) throws IOException, InterruptedException {
+        log.info("Произведён GET-запрос по адресу " + gatewayService + "/tasks/?date=" + date);
         return responseService.showAllTasksAtDay(date);
     }
 
@@ -66,15 +66,15 @@ public class GatewayController {
         return responseService.rescheduleTask(taskDTO);
     }
 
-    @PutMapping("tasks/{taskId}/make-done")
+    @PutMapping("tasks/{taskId}/do")
     public ResponseEntity<AnyTypePattern> makeTaskDone(@PathVariable int taskId) throws IOException, InterruptedException {
-        log.info("Произведён PUT-запрос по адресу " + gatewayService + "/tasks/" + taskId + "/make-done");
+        log.info("Произведён PUT-запрос по адресу " + gatewayService + "/tasks/" + taskId + "/do");
         return responseService.makeTaskDone(taskId);
     }
 
-    @PutMapping("tasks/{taskId}/make-undone")
+    @PutMapping("tasks/{taskId}/undo")
     public ResponseEntity<AnyTypePattern> makeTaskUndone(@PathVariable int taskId) throws IOException, InterruptedException {
-        log.info("Произведён PUT-запрос по адресу " + gatewayService + "/tasks/" + taskId + "/make-undone");
+        log.info("Произведён PUT-запрос по адресу " + gatewayService + "/tasks/" + taskId + "/undo");
         return responseService.makeTaskUndone(taskId);
     }
 

@@ -45,7 +45,7 @@ public class ResponseServiceImpl implements ResponseService {
         HttpRequest request = HttpRequest.newBuilder().GET()
                 .timeout(Duration.ofSeconds(5))
                 .header("token", token)
-                .uri(URI.create(pathToTaskService + "/tasks/id-"+ taskId))
+                .uri(URI.create(pathToTaskService + "/tasks/"+ taskId))
                 .build();
         log.info("Создался GET-запрос по адресу " + request.uri() + " с токеном " + tokenDTO);
         TaskDTO response = objectMapper.readValue(sendRequest(request).getBody(), TaskDTO.class);
@@ -58,7 +58,7 @@ public class ResponseServiceImpl implements ResponseService {
         HttpRequest request = HttpRequest.newBuilder().GET()
                 .timeout(Duration.ofSeconds(5))
                 .header("token", token)
-                .uri(URI.create(pathToTaskService + "/tasks/all"))
+                .uri(URI.create(pathToTaskService + "/tasks"))
                 .build();
         log.info("Создался GET-запрос по адресу " + request.uri() + " с токеном " + tokenDTO);
         List<TaskDTO> response = objectMapper.readValue(sendRequest(request).getBody(), List.class);
@@ -71,7 +71,7 @@ public class ResponseServiceImpl implements ResponseService {
         HttpRequest request = HttpRequest.newBuilder().GET()
                 .timeout(Duration.ofSeconds(5))
                 .header("token", token)
-                .uri(URI.create(pathToTaskService + "/tasks/date-"+ dateStr))
+                .uri(URI.create(pathToTaskService + "/tasks/?date="+ dateStr))
                 .build();
         log.info("Создался GET-запрос по адресу " + request.uri() + " с токеном " + tokenDTO);
         List<TaskDTO> response = objectMapper.readValue(sendRequest(request).getBody(), List.class);
@@ -144,7 +144,7 @@ public class ResponseServiceImpl implements ResponseService {
                 .timeout(Duration.ofSeconds(5))
                 .header("token", token)
                 .uri(URI.create(pathToTaskService + "/tasks/"
-                        + taskId + "/make-done"))
+                        + taskId + "/do"))
                 .build();
         log.info("Создался PUT-запрос по адресу " + request.uri() + " с токеном " + tokenDTO);
         logPutRequest(tokenDTO, request);
@@ -159,7 +159,7 @@ public class ResponseServiceImpl implements ResponseService {
                 .timeout(Duration.ofSeconds(5))
                 .header("token", token)
                 .uri(URI.create(pathToTaskService + "/tasks/"
-                        + taskId + "/make-undone"))
+                        + taskId + "/undo"))
                 .build();
         log.info("Создался PUT-запрос по адресу " + request.uri() + " с токеном " + tokenDTO);
         logPutRequest(tokenDTO, request);

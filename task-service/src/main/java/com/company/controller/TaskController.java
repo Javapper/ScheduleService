@@ -28,9 +28,9 @@ public class TaskController {
         this.taskService = taskService;
     }
 
-    @GetMapping("id-{taskId}")
+    @GetMapping("{taskId}")
     public ResponseEntity<TaskDTO> showTaskById(@PathVariable long taskId, @RequestHeader String token) throws IOException, InterruptedException {
-        log.info("Произведён GET-запрос по адресу " + pathToTaskService + "/tasks/id-" + taskId + " с токеном " + token);
+        log.info("Произведён GET-запрос по адресу " + pathToTaskService + "/tasks/" + taskId + " с токеном " + token);
         if (taskService.isAllowedRequest(token)) {
             log.info("Токен прошёл проверку");
             TaskDTO taskDTO = taskService.showTaskById(taskId);
@@ -40,7 +40,7 @@ public class TaskController {
         return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
     }
 
-    @GetMapping("all")
+    @GetMapping("")
     public ResponseEntity<List<TaskDTO>> showAllTasks(@RequestHeader String token) throws IOException, InterruptedException {
         log.info("Произведён GET-запрос по адресу " + pathToTaskService + "/tasks/all");
         if (taskService.isAllowedRequest(token)) {
@@ -53,9 +53,9 @@ public class TaskController {
 
     }
 
-    @GetMapping("date-{dateStr}")
-    public ResponseEntity<List<TaskDTO>> showAllTasksAtDay(@PathVariable String dateStr, @RequestHeader String token) throws IOException, InterruptedException {
-        log.info("Произведён GET-запрос по адресу " + pathToTaskService + "/tasks/date-" + dateStr);
+    @GetMapping("?date={date}")
+    public ResponseEntity<List<TaskDTO>> showAllTasksAtDay(@RequestParam String dateStr, @RequestHeader String token) throws IOException, InterruptedException {
+        log.info("Произведён GET-запрос по адресу " + pathToTaskService + "/tasks/?date=" + dateStr);
         if (taskService.isAllowedRequest(token)) {
             log.info("Токен прошёл проверку");
             LocalDate date = LocalDate.parse(dateStr, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
@@ -81,7 +81,7 @@ public class TaskController {
 
     @DeleteMapping("{taskId}")
     public ResponseEntity<AnyTypePattern> deleteTask(@PathVariable int taskId, @RequestHeader String token) throws IOException, InterruptedException {
-        log.info("Произведён DELETE-запрос по адресу " + pathToTaskService + "/tasks/id-" + taskId);
+        log.info("Произведён DELETE-запрос по адресу " + pathToTaskService + "/tasks/" + taskId);
         if (taskService.isAllowedRequest(token)) {
             log.info("Токен прошёл проверку");
             taskService.deleteTask(taskId);
@@ -112,9 +112,9 @@ public class TaskController {
         return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
     }
 
-    @PutMapping("{taskId}/make-done")
+    @PutMapping("{taskId}/do")
     public ResponseEntity<AnyTypePattern> makeTaskDone(@PathVariable int taskId, @RequestHeader String token) throws IOException, InterruptedException {
-        log.info("Произведён PUT-запрос по адресу " + pathToTaskService + "/tasks/" + taskId + "/make-done");
+        log.info("Произведён PUT-запрос по адресу " + pathToTaskService + "/tasks/" + taskId + "/do");
         if (taskService.isAllowedRequest(token)) {
             log.info("Токен прошёл проверку");
             taskService.makeTaskDone(taskId);
@@ -123,9 +123,9 @@ public class TaskController {
         return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
     }
 
-    @PutMapping("{taskId}/make-undone")
+    @PutMapping("{taskId}/undo")
     public ResponseEntity<AnyTypePattern> makeTaskUndone(@PathVariable int taskId, @RequestHeader String token) throws IOException, InterruptedException {
-        log.info("Произведён PUT-запрос по адресу " + pathToTaskService + "/tasks/" + taskId + "/make-undone");
+        log.info("Произведён PUT-запрос по адресу " + pathToTaskService + "/tasks/" + taskId + "/undo");
         if (taskService.isAllowedRequest(token)) {
             log.info("Токен прошёл проверку");
             taskService.makeTaskUndone(taskId);
