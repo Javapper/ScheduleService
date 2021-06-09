@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -110,8 +111,8 @@ public class TaskServiceImpl implements TaskService {
                 .build();
         HttpResponse<String> response = client
                 .send(request, HttpResponse.BodyHandlers.ofString());
-        log.info("Получен результат от сервера аторизации: " + response.body());
-        return response.body().equals("true");
+        log.info("Получен результат от сервера аторизации: " + response.statusCode());
+        return response.statusCode() == 200;
     }
 
 }

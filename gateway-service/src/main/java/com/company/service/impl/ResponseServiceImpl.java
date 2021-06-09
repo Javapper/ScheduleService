@@ -29,7 +29,7 @@ public class ResponseServiceImpl implements ResponseService {
     private final String nameOfTaskService = "task-service";
     private final String nameOfNotificationService = "notification-service";
 
-    private final String pathToTaskService = "http://gateway-service:8090";
+    private final String pathToTaskService = "http://task-service:8090";
     private final String pathToNotificationService = "http://notification-service:8091";
     private final String pathToAuthorizationService = "http://authorization-service:8092";
 
@@ -208,7 +208,7 @@ public class ResponseServiceImpl implements ResponseService {
         HttpRequest request = HttpRequest.newBuilder()
                 .POST(HttpRequest.BodyPublishers.noBody())
                 .timeout(Duration.ofSeconds(5))
-                .uri(URI.create(pathToAuthorizationService + "/tokens/create-token-from-gateway-to-" + serviceTo))
+                .uri(URI.create(pathToAuthorizationService + "/tokens/create-token-from-gateway-service-to-" + serviceTo))
                 .build();
         HttpResponse<String> response = client
                 .send(request, HttpResponse.BodyHandlers.ofString());

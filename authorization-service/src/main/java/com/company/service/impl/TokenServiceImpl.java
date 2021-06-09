@@ -56,8 +56,10 @@ public class TokenServiceImpl implements TokenService {
         AllowedRequestEntity request = AllowedRequestEntity.builder()
                 .serviceFrom(serviceFrom)
                 .serviceTo(serviceTo).build();
+        log.info("Запрос к БД на получение AllowedRequestEntity, serviceFrom = " + serviceFrom + ", serviceTo = " + serviceTo);
         AllowedRequestEntity response = allowedRequestMapper.selectAllowedRequestIfExist(request);
-        return !response.getServiceFrom().isEmpty();
+        log.info("Получен ответ от БД: " + response);
+        return response != null;
     }
 
     private TokenEntity createNewToken(String serviceFrom, String serviceTo) {
@@ -76,11 +78,13 @@ public class TokenServiceImpl implements TokenService {
         log.info("Произведён запрос на проверку токена");
         TokenEntity tokenEntity = tokenMapper.selectTokenIfExist(modelMapper.map(tokenDTO, TokenEntity.class));
         log.info("Рузльтат поиска токена в БД: " + tokenEntity);
-        if ( tokenEntity!= null) {
+        if ( tokenEntity != null) {
             if (tokenEntity.getSendingTime() + 5000 > new Date().getTime()) {
                 log.info("Токен валиден");
             }
+            log.info("Удаляется токен из БД");
             tokenMapper.deleteToken(tokenEntity);
+            log.info("Токен удалён из БД");
             return true;
         }
         log.info("Токен не валиден");

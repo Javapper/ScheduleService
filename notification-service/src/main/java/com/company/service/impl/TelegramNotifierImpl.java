@@ -97,8 +97,8 @@ public class TelegramNotifierImpl implements TelegramNotifier {
                 .build();
         HttpResponse<String> response = client
                 .send(request, HttpResponse.BodyHandlers.ofString());
-        log.info("Получен результат от сервера аторизации: " + response.body());
-        return response.body().equals("true");
+        log.info("Получен результат от сервера аторизации: " + response.statusCode());
+        return response.statusCode() == 200;
     }
 }
 

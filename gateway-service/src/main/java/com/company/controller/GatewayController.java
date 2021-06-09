@@ -30,7 +30,7 @@ public class GatewayController {
         return responseService.showTaskById(taskId);
     }
 
-    @GetMapping("tasks/")
+    @GetMapping("tasks")
     public ResponseEntity<List<TaskDTO>> showAllTasks() throws IOException, InterruptedException {
         log.info("Произведён GET-запрос по адресу "+ gatewayService + "/tasks");
         return responseService.showAllTasks();
