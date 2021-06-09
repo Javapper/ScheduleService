@@ -34,37 +34,41 @@ public class TaskController {
         if (taskId == 0) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         } else if (token == null) {
-            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         } else {
-            if (taskService.isAllowedRequest(token)) {
+            ResponseEntity<?> responseEntity = taskService.isAllowedRequest(token);
+            if (responseEntity.getStatusCode().equals(HttpStatus.OK)) {
                 log.info("Токен прошёл проверку");
                 TaskDTO taskDTO = taskService.showTaskById(taskId);
                 log.info("С сервиса возвращается тело объекта: " + taskDTO);
                 return ResponseEntity.ok(taskDTO);
             }
-            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
+            return ResponseEntity.status(responseEntity.getStatusCode()).build();
         }
     }
 
     @GetMapping("")
     public ResponseEntity<List<TaskDTO>> showAllTasks(@RequestHeader String token) throws IOException, InterruptedException {
-        log.info("Произведён GET-запрос по адресу " + pathToTaskService + "/tasks/all");
+        log.info("Произведён GET-запрос по адресу " + pathToTaskService + "/tasks");
         if (token != null) {
-            if (taskService.isAllowedRequest(token)) {
+            ResponseEntity<?> responseEntity = taskService.isAllowedRequest(token);
+            if (responseEntity.getStatusCode().equals(HttpStatus.OK)) {
                 log.info("Токен прошёл проверку");
                 List<TaskDTO> tasksDTO = taskService.showAllTasks();
                 log.info("С сервиса возвращается тело объекта: " + tasksDTO);
                 return ResponseEntity.ok(tasksDTO);
             }
+            return ResponseEntity.status(responseEntity.getStatusCode()).build();
         }
-        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 
     @GetMapping("?date={date}")
     public ResponseEntity<List<TaskDTO>> showAllTasksAtDay(@RequestParam String date, @RequestHeader String token) throws IOException, InterruptedException {
         log.info("Произведён GET-запрос по адресу " + pathToTaskService + "/tasks/?date=" + date);
         if (token != null) {
-            if (taskService.isAllowedRequest(token)) {
+            ResponseEntity<?> responseEntity = taskService.isAllowedRequest(token);
+            if (responseEntity.getStatusCode().equals(HttpStatus.OK)) {
                 log.info("Токен прошёл проверку");
                 try {
                     LocalDate localDate = LocalDate.parse(date, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
@@ -72,11 +76,12 @@ public class TaskController {
                     log.info("С сервиса возвращается тело объекта: " + tasksDTO);
                     return ResponseEntity.ok(tasksDTO);
                 } catch (Exception e) {
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
                 }
             }
+            return ResponseEntity.status(responseEntity.getStatusCode()).build();
         }
-        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 
         @PostMapping("/")
@@ -85,14 +90,15 @@ public class TaskController {
         if (task == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         } else if (token == null) {
-            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         } else {
-            if (taskService.isAllowedRequest(token)) {
+            ResponseEntity<?> responseEntity = taskService.isAllowedRequest(token);
+            if (responseEntity.getStatusCode().equals(HttpStatus.OK)) {
                 log.info("Токен прошёл проверку");
                 taskService.addTask(task);
                 return ResponseEntity.ok().build();
             }
-            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
+            return ResponseEntity.status(responseEntity.getStatusCode()).build();
         }
     }
 
@@ -102,14 +108,15 @@ public class TaskController {
         if (taskId == 0) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         } else if (token == null) {
-            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         } else {
-            if (taskService.isAllowedRequest(token)) {
+            ResponseEntity<?> responseEntity = taskService.isAllowedRequest(token);
+            if (responseEntity.getStatusCode().equals(HttpStatus.OK)) {
                 log.info("Токен прошёл проверку");
                 taskService.deleteTask(taskId);
                 return ResponseEntity.ok().build();
             }
-            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
+            return ResponseEntity.status(responseEntity.getStatusCode()).build();
         }
     }
 
@@ -119,14 +126,15 @@ public class TaskController {
         if (task.equals("'") || task.isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         } else if (token == null) {
-            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         } else {
-            if (taskService.isAllowedRequest(token)) {
+            ResponseEntity<?> responseEntity = taskService.isAllowedRequest(token);
+            if (responseEntity.getStatusCode().equals(HttpStatus.OK)) {
                 log.info("Токен прошёл проверку");
                 taskService.updateTask(task);
                 return ResponseEntity.ok().build();
             }
-            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
+            return ResponseEntity.status(responseEntity.getStatusCode()).build();
         }
     }
 
@@ -134,13 +142,15 @@ public class TaskController {
     public ResponseEntity<AnyTypePattern> rescheduleTask(@RequestBody @Validated String taskDTO, @RequestHeader String token) throws IOException, InterruptedException {
         log.info("Произведён PUT-запрос по адресу " + pathToTaskService + "/tasks/change-date с телом = " + taskDTO);
         if (token != null) {
-            if (taskService.isAllowedRequest(token)) {
+            ResponseEntity<?> responseEntity = taskService.isAllowedRequest(token);
+            if (responseEntity.getStatusCode().equals(HttpStatus.OK)) {
                 log.info("Токен прошёл проверку");
                 taskService.rescheduleTask(taskDTO);
                 return ResponseEntity.ok().build();
             }
+            return ResponseEntity.status(responseEntity.getStatusCode()).build();
         }
-        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 
     @PutMapping("{taskId}/do")
@@ -149,14 +159,15 @@ public class TaskController {
         if (taskId == 0) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         } else if (token == null) {
-            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         } else {
-            if (taskService.isAllowedRequest(token)) {
+            ResponseEntity<?> responseEntity = taskService.isAllowedRequest(token);
+            if (responseEntity.getStatusCode().equals(HttpStatus.OK)) {
                 log.info("Токен прошёл проверку");
                 taskService.makeTaskDone(taskId);
                 return ResponseEntity.ok().build();
             }
-            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
+            return ResponseEntity.status(responseEntity.getStatusCode()).build();
         }
     }
 
@@ -166,14 +177,15 @@ public class TaskController {
         if (taskId == 0) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         } else if (token == null) {
-            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         } else {
-            if (taskService.isAllowedRequest(token)) {
+            ResponseEntity<?> responseEntity = taskService.isAllowedRequest(token);
+            if (responseEntity.getStatusCode().equals(HttpStatus.OK)) {
                 log.info("Токен прошёл проверку");
                 taskService.makeTaskUndone(taskId);
                 return ResponseEntity.ok().build();
             }
-            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
+            return ResponseEntity.status(responseEntity.getStatusCode()).build();
         }
     }
 }

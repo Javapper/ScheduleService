@@ -1,10 +1,11 @@
 package com.company.service.api;
 
 import com.company.dto.AllowedRequestDTO;
+import org.springframework.http.ResponseEntity;
 
 public interface AllowedRequestService {
 
-    void addAllowedRequest(AllowedRequestDTO allowedRequestDTO);
+    ResponseEntity addAllowedRequest(AllowedRequestDTO allowedRequestDTO);
 
-    void deleteAllowedRequest(AllowedRequestDTO allowedRequestDTO);
+    ResponseEntity<?> deleteAllowedRequest(AllowedRequestDTO allowedRequestDTO);
 }

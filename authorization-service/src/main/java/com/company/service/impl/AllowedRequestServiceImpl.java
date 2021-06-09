@@ -6,6 +6,8 @@ import com.company.mapper.AllowedRequestMapper;
 import com.company.service.api.AllowedRequestService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -20,14 +22,32 @@ public class AllowedRequestServiceImpl implements AllowedRequestService {
     }
 
     @Override
-    public void addAllowedRequest(AllowedRequestDTO allowedRequestDTO) {
-        AllowedRequestEntity allowedRequestEntity = modelMapper.map(allowedRequestDTO, AllowedRequestEntity.class);
-        allowedRequestMapper.addAllowedRequest(allowedRequestEntity);
+    public ResponseEntity<?> addAllowedRequest(AllowedRequestDTO allowedRequestDTO) {
+        if (allowedRequestDTO == null) {
+            return ResponseEntity.badRequest().build();
+        } else {
+            try {
+                AllowedRequestEntity allowedRequestEntity = modelMapper.map(allowedRequestDTO, AllowedRequestEntity.class);
+                allowedRequestMapper.addAllowedRequest(allowedRequestEntity);
+                return ResponseEntity.ok().build();
+            } catch (Exception e) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            }
+        }
     }
 
     @Override
-    public void deleteAllowedRequest(AllowedRequestDTO allowedRequestDTO) {
-        AllowedRequestEntity allowedRequestEntity = modelMapper.map(allowedRequestDTO, AllowedRequestEntity.class);
-        allowedRequestMapper.deleteAllowedRequest(allowedRequestEntity);
+    public ResponseEntity<?> deleteAllowedRequest(AllowedRequestDTO allowedRequestDTO) {
+        if (allowedRequestDTO == null) {
+            return ResponseEntity.badRequest().build();
+        } else {
+            try {
+                AllowedRequestEntity allowedRequestEntity = modelMapper.map(allowedRequestDTO, AllowedRequestEntity.class);
+                allowedRequestMapper.deleteAllowedRequest(allowedRequestEntity);
+                return ResponseEntity.ok().build();
+            } catch (Exception e) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            }
+        }
     }
 }

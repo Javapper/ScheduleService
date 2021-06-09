@@ -41,25 +41,34 @@ public class TokenServiceImpl implements TokenService {
     @Override
     public ResponseEntity<?> createToken(String serviceFrom, String serviceTo) {
         log.info("Получен запрос на создание нового токена");
-        if (isRequestAllowed(serviceFrom, serviceTo)) {
+        ResponseEntity responseEntity = isRequestAllowed(serviceFrom, serviceTo);
+        if ( responseEntity.getStatusCode().equals(HttpStatus.OK)) {
             log.info("Запрос от одного сервиса к другому разрешён");
             TokenEntity newToken = createNewToken(serviceFrom, serviceTo);
             tokenMapper.addToken(newToken);
             return ResponseEntity.ok(modelMapper.map(newToken, TokenDTO.class));
         }
         log.info("Запрос от одного сервиса к другому запрещён");
-        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
+        return ResponseEntity.status(responseEntity.getStatusCode()).build();
     }
 
-    private boolean isRequestAllowed(String serviceFrom, String serviceTo) {
+    private ResponseEntity<?> isRequestAllowed(String serviceFrom, String serviceTo) {
         log.info("Проверка на доступность запросов от одного сервиса к другому");
-        AllowedRequestEntity request = AllowedRequestEntity.builder()
-                .serviceFrom(serviceFrom)
-                .serviceTo(serviceTo).build();
-        log.info("Запрос к БД на получение AllowedRequestEntity, serviceFrom = " + serviceFrom + ", serviceTo = " + serviceTo);
-        AllowedRequestEntity response = allowedRequestMapper.selectAllowedRequestIfExist(request);
-        log.info("Получен ответ от БД: " + response);
-        return response != null;
+        try {
+            log.info("Запрос к БД на получение AllowedRequestEntity, serviceFrom = " + serviceFrom + ", serviceTo = " + serviceTo);
+            AllowedRequestEntity request = AllowedRequestEntity.builder()
+                    .serviceFrom(serviceFrom)
+                    .serviceTo(serviceTo).build();
+            AllowedRequestEntity response = allowedRequestMapper.selectAllowedRequestIfExist(request);
+            log.info("Получен ответ от БД: " + response);
+            if (response != null) {
+                return ResponseEntity.ok().build();
+            } else {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     private TokenEntity createNewToken(String serviceFrom, String serviceTo) {

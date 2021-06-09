@@ -11,5 +11,5 @@ public interface TelegramNotifier {
 
     ResponseEntity<AnyTypePattern> stopSendMessages();
 
-    boolean isAllowedRequest(String token) throws IOException, InterruptedException;
+    ResponseEntity<?> isAllowedRequest(String token) throws IOException, InterruptedException;
 }

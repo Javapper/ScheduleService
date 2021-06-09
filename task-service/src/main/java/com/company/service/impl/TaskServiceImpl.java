@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -102,17 +103,24 @@ public class TaskServiceImpl implements TaskService {
         taskMapper.makeTaskUndone(taskId);
     }
 
-    public boolean isAllowedRequest(String token) throws IOException, InterruptedException {
+    public ResponseEntity<?> isAllowedRequest(String token) throws IOException, InterruptedException {
         log.info("Запрос на сервер авторизации для проверки токена");
-        HttpRequest request = HttpRequest.newBuilder()
-                .POST(HttpRequest.BodyPublishers.ofString(token))
-                .timeout(Duration.ofSeconds(5))
-                .uri(URI.create(pathToAuthorizationService + "/tokens/check-token"))
-                .build();
-        HttpResponse<String> response = client
-                .send(request, HttpResponse.BodyHandlers.ofString());
-        log.info("Получен результат от сервера аторизации: " + response.statusCode());
-        return response.statusCode() == 200;
+        try {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .POST(HttpRequest.BodyPublishers.ofString(token))
+                    .timeout(Duration.ofSeconds(5))
+                    .uri(URI.create(pathToAuthorizationService + "/tokens/check-token"))
+                    .build();
+            HttpResponse<String> response = client
+                    .send(request, HttpResponse.BodyHandlers.ofString());
+            log.info("Получен результат от сервера аторизации: " + response.statusCode());
+            if (response.statusCode() == 200) {
+                return ResponseEntity.ok().build();
+            } else {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
-
 }

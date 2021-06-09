@@ -37,6 +37,6 @@ public class TokenController {
             return ResponseEntity.ok().build();
         }
         log.info("С сервера возвращается информация о том, что токен не валиден");
-        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
 }

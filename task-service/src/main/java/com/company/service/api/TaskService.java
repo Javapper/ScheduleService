@@ -2,6 +2,7 @@ package com.company.service.api;
 
 import com.company.dto.TaskDTO;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.springframework.http.ResponseEntity;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -26,7 +27,7 @@ public interface TaskService {
 
     void makeTaskUndone(int taskId);
 
-    boolean isAllowedRequest(String task) throws IOException, InterruptedException;
+    ResponseEntity<?> isAllowedRequest(String task) throws IOException, InterruptedException;
 
 
 }

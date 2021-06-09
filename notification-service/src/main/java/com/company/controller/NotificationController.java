@@ -28,24 +28,29 @@ public class NotificationController {
     }
 
     @PutMapping("turn-on")
-    public ResponseEntity<AnyTypePattern> startSendMessagesInTelegram(@RequestHeader String token) throws IOException, InterruptedException {
+    public ResponseEntity<?> startSendMessagesInTelegram(@RequestHeader String token) throws IOException, InterruptedException {
         log.info("Произведён PUT-запрос по адресу " + servicePath + "/turn-on");
-        if (telegramNotifier.isAllowedRequest(token)) {
+        if (token == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        ResponseEntity<?> responseEntity = telegramNotifier.isAllowedRequest(token);
+        if (responseEntity.getStatusCode().equals(HttpStatus.OK)) {
             log.info("Токен прошёл проверку");
             telegramNotifier.startSendMessages();
             return ResponseEntity.ok().build();
         }
-        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
+        return ResponseEntity.status(responseEntity.getStatusCode()).build();
     }
 
     @PutMapping("turn-off")
-    public ResponseEntity<AnyTypePattern> stopSendMessagesInTelegram(@RequestHeader String token) throws IOException, InterruptedException {
+    public ResponseEntity<?> stopSendMessagesInTelegram(@RequestHeader String token) throws IOException, InterruptedException {
         log.info("Произведён PUT-запрос по адресу " + servicePath + "/turn-off");
-        if (telegramNotifier.isAllowedRequest(token)) {
+        ResponseEntity<?> responseEntity = telegramNotifier.isAllowedRequest(token);
+        if (responseEntity.getStatusCode().equals(HttpStatus.OK)) {
             log.info("Токен прошёл проверку");
             telegramNotifier.stopSendMessages();
             return ResponseEntity.ok().build();
         }
-        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
+        return ResponseEntity.status(responseEntity.getStatusCode()).build();
     }
 }
