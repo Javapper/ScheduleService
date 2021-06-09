@@ -9,23 +9,23 @@ import java.time.LocalDate;
 import java.util.List;
 
 public interface TaskService {
-    TaskDTO showTaskById(long taskId);
+    ResponseEntity<TaskDTO> showTaskById(long taskId);
 
-    List<TaskDTO> showAllTasks();
+    ResponseEntity<List<TaskDTO>> showAllTasks();
 
-    List<TaskDTO> showAllTasksAtDay(LocalDate date);
+    ResponseEntity<List<TaskDTO>> showAllTasksAtDay(LocalDate date);
 
-    void addTask(String task) throws JsonProcessingException;
+    ResponseEntity<?> addTask(String task) throws JsonProcessingException;
 
-    void deleteTask(int taskId);
+    ResponseEntity<?> deleteTask(int taskId);
 
-    void updateTask(String task) throws JsonProcessingException;
+    ResponseEntity<?> updateTask(String task) throws JsonProcessingException;
 
-    void rescheduleTask(String task) throws JsonProcessingException;
+    ResponseEntity<?> rescheduleTask(String task) throws JsonProcessingException;
 
-    void makeTaskDone(int taskId);
+    ResponseEntity<?> makeTaskDone(int taskId);
 
-    void makeTaskUndone(int taskId);
+    ResponseEntity<?> makeTaskUndone(int taskId);
 
     ResponseEntity<?> isAllowedRequest(String task) throws IOException, InterruptedException;
 

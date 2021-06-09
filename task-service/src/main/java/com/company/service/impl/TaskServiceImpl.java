@@ -4,7 +4,6 @@ import com.company.dto.TaskDTO;
 import com.company.entity.TaskEntity;
 import com.company.mapper.TaskMapper;
 import com.company.service.api.TaskService;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -13,7 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -43,67 +41,140 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public TaskDTO showTaskById(long taskId) {
+    public ResponseEntity<TaskDTO> showTaskById(long taskId) {
         log.info("Запрос в БД на показ задания с id = " + taskId);
-        return modelMapper.map(taskMapper.showTaskById(taskId), TaskDTO.class);
+        TaskDTO taskDTO;
+        try {
+           taskDTO = modelMapper.map(taskMapper.showTaskById(taskId), TaskDTO.class);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+        if (taskDTO == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        return ResponseEntity.ok(taskDTO);
     }
 
     @Override
-    public List<TaskDTO> showAllTasks() {
+    public ResponseEntity<List<TaskDTO>> showAllTasks() {
         log.info("Запрос в БД на показ всех заданий");
-        return taskMapper.showAllTasks().stream()
-                .map(taskEntity -> modelMapper.map(taskEntity, TaskDTO.class))
-                .collect(Collectors.toList());
+        List<TaskDTO> tasksDTO;
+        try {
+            tasksDTO = taskMapper.showAllTasks().stream()
+                    .map(taskEntity -> modelMapper.map(taskEntity, TaskDTO.class))
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+        if (tasksDTO == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        return ResponseEntity.ok(tasksDTO);
     }
 
     @Override
-    public List<TaskDTO> showAllTasksAtDay(LocalDate date) {
+    public ResponseEntity<List<TaskDTO>> showAllTasksAtDay(LocalDate date) {
         log.info("Запрос в БД на показ всех заданий с date = " + date);
-        return taskMapper.showAllTasksAtDay(date).stream()
-                .map(taskEntity -> modelMapper.map(taskEntity, TaskDTO.class))
-                .collect(Collectors.toList());
+        List<TaskDTO> tasksDTO;
+        try {
+            tasksDTO = taskMapper.showAllTasksAtDay(date).stream()
+                    .map(taskEntity -> modelMapper.map(taskEntity, TaskDTO.class))
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+        if (tasksDTO == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        return ResponseEntity.ok(tasksDTO);
     }
 
     @Override
-    public void addTask(String task) throws JsonProcessingException {
-        TaskDTO taskDTO = objectMapper.readValue(task, TaskDTO.class);
-        log.info("Запрос в БД на добавления задания с task = {} и date = {}", taskDTO.getTask(), taskDTO.getDate());
-        taskMapper.addTask(modelMapper.map(taskDTO, TaskEntity.class));
+    public ResponseEntity<?> addTask(String task) {
+        TaskDTO taskDTO;
+        try {
+            taskDTO = objectMapper.readValue(task, TaskDTO.class);
+            log.info("Запрос в БД на добавления задания с task = {} и date = {}", taskDTO.getTask(), taskDTO.getDate());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+         try {
+            taskMapper.addTask(modelMapper.map(taskDTO, TaskEntity.class));
+        } catch (Exception e) {
+             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+         }
+         return ResponseEntity.ok().build();
     }
 
     @Override
-    public void deleteTask(int taskId) {
+    public ResponseEntity<?> deleteTask(int taskId) {
         log.info("Запрос в БД на удаление задания с id = " + taskId);
-        taskMapper.deleteTask(taskId);
+        try {
+            taskMapper.deleteTask(taskId);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     @Override
-    public void updateTask(String task) throws JsonProcessingException {
-        TaskDTO taskDTO = objectMapper.readValue(task, TaskDTO.class);
-        log.info("Запрос в БД на обновление task = {} у задания с id = {}", taskDTO.getTask(), taskDTO.getTaskId());
-        taskMapper.updateTask(modelMapper.map(taskDTO, TaskEntity.class));
+    public ResponseEntity<?> updateTask(String task) {
+        TaskDTO taskDTO;
+        try {
+            taskDTO = objectMapper.readValue(task, TaskDTO.class);
+            log.info("Запрос в БД на обновление task = {} у задания с id = {}", taskDTO.getTask(), taskDTO.getTaskId());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+        try {
+            taskMapper.updateTask(modelMapper.map(taskDTO, TaskEntity.class));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+        return ResponseEntity.ok().build();
     }
 
     @Override
-    public void rescheduleTask(String task) throws JsonProcessingException {
-        TaskDTO taskDTO = objectMapper.readValue(task, TaskDTO.class);
-        log.info("Запрос в БД на обновление date = {} у задания с id = {}", taskDTO.getDate(), taskDTO.getTaskId());
-        taskMapper.rescheduleTask(modelMapper.map(taskDTO, TaskEntity.class));
+    public ResponseEntity<?> rescheduleTask(String task) {
+        TaskDTO taskDTO;
+        try {
+            taskDTO = objectMapper.readValue(task, TaskDTO.class);
+            log.info("Запрос в БД на обновление date = {} у задания с id = {}", taskDTO.getDate(), taskDTO.getTaskId());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+        try {
+            taskMapper.rescheduleTask(modelMapper.map(taskDTO, TaskEntity.class));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+        return ResponseEntity.ok().build();
     }
 
     @Override
-    public void makeTaskDone(int taskId) {
+    public ResponseEntity<?> makeTaskDone(int taskId) {
         log.info("Запрос в БД на обновление isDone = true у задания с id = " + taskId);
-        taskMapper.makeTaskDone(taskId);
+        try {
+            taskMapper.makeTaskDone(taskId);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+        return ResponseEntity.ok().build();
+
     }
 
     @Override
-    public void makeTaskUndone(int taskId) {
+    public ResponseEntity<?> makeTaskUndone(int taskId) {
         log.info("Запрос в БД на обновление isDone = false у задания с id = " + taskId);
-        taskMapper.makeTaskUndone(taskId);
+        try {
+            taskMapper.makeTaskUndone(taskId);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+        return ResponseEntity.ok().build();
     }
 
-    public ResponseEntity<?> isAllowedRequest(String token) throws IOException, InterruptedException {
+    public ResponseEntity<?> isAllowedRequest(String token) {
         log.info("Запрос на сервер авторизации для проверки токена");
         try {
             HttpRequest request = HttpRequest.newBuilder()
